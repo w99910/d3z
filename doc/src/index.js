@@ -4,7 +4,6 @@ import {createApp, defineAsyncComponent} from 'vue';
 
 import Main from "./index.vue";
 
-
 const app = createApp(Main)
 
 for (let component of Object.keys(import.meta.glob('./components/**/*.vue'))) {
