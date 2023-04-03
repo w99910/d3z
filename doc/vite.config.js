@@ -19,8 +19,7 @@ export default defineConfig({
     },
     build: {
         // minify: false,
-        outDir: './dist/',
-        emptyOutDir: true,
+        outDir: './',
         rollupOptions: {
             input: {
                 app: './main.html', // default
