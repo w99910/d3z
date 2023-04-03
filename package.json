@@ -1,0 +1,25 @@
+{
+    "name": "d3z",
+    "version": "0.0.1",
+    "description": "Free, Open Source and Customizable Upgraded D3 charts",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "D3",
+        "charts"
+    ],
+    "author": "Zaw Lin Tun",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/d3": "^7.4.0",
+        "d3": "^7.8.2",
+        "vite": "^4.2.0"
+    },
+    "dependencies": {
+        "stats.js": "^0.17.0"
+    }
+}
