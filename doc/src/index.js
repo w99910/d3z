@@ -11,7 +11,7 @@ for (let component of Object.keys(import.meta.glob('./components/**/*.vue'))) {
     let componentPath = component
         // .replace('./components/', '')
         .replace('.vue', '');
-    app.component(componentName, defineAsyncComponent(() => import( componentPath + '.vue')))
+    app.component(componentName, defineAsyncComponent(() => import( new URL(componentPath + '.vue', import.meta.url))))
 }
 
 app.mount('#app')
