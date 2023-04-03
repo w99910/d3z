@@ -13,9 +13,9 @@ const convertToIndexFileName = () => {
 };
 export default defineConfig({
     plugins: [vuePlugin(), convertToIndexFileName()],
-    base: 'https://w99910.github.io/d3z/',
+    // base: 'https://w99910.github.io/d3z/',
     server: {
-        open: '/main.html',
+        open: './main.html',
     },
     build: {
         outDir: './',
