@@ -30,16 +30,21 @@ export default defineConfig({
             },
         },
     }), convertToIndexFileName()],
-    base: 'https://w99910.github.io/d3z/',
+    // base: 'https://w99910.github.io/d3z/',
     server: {
         open: './main.html',
     },
     build: {
-        outDir: './',
+        // minify: false,
+        outDir: './dist/',
+        emptyOutDir: true,
         rollupOptions: {
             input: {
                 app: './main.html', // default
             },
+            external: [
+                /^components\/*.vue$/
+            ],
         },
     }
 })
