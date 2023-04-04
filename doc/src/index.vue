@@ -19,9 +19,9 @@
             </div>
         </nav>
         <div class="w-full h-full p-4">
-            <keep-alive>
-                <component :is="currentComponent"></component>
-            </keep-alive>
+            <!--            <keep-alive>-->
+            <component :is="currentComponent"></component>
+            <!--            </keep-alive>-->
         </div>
 
     </div>
@@ -39,7 +39,7 @@ const components = {
         'lineChart': 'Line Chart',
         'networkgraphChart': 'Networkgraph Chart',
         'pieChart': 'Pie Chart',
-        'scatterChart': 'Scatter Chart',
+        'scatterPlotChart': 'ScatterPlot Chart',
         'stackedBarChart': 'Stacked Bar Chart',
         'areaChart': 'Area Chart',
     },

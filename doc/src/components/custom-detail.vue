@@ -28,7 +28,6 @@ import {ref} from 'vue'
 const show = ref(false);
 
 const toggleShow = () => {
-    console.log('toggle')
     show.value = !show.value;
 }
 
