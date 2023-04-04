@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "dev": "vite",
-        "build": "vite build",
+        "build": "vite build --base='https://w99910.github.io/d3z/'",
         "preview": "vite preview"
     },
     "devDependencies": {

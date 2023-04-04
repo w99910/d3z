@@ -3,10 +3,13 @@ import vuePlugin from "@vitejs/plugin-vue";
 import {rm} from 'node:fs/promises'
 import {resolve} from 'node:path'
 
-const convertToIndexFileName = () => {
+const prepare = () => {
     return {
         name: 'renameIndex',
         enforce: 'post',
+        async buildStart() {
+            await rm(resolve(__dirname, 'assets'), {recursive: true, force: true});
+        },
         generateBundle(options, bundle) {
             const indexHtml = bundle['main.html']
             indexHtml.fileName = 'index.html'
@@ -15,13 +18,7 @@ const convertToIndexFileName = () => {
     }
 };
 export default defineConfig({
-    plugins: [vuePlugin(), convertToIndexFileName(), {
-        name: 'removeAssets',
-        async buildStart() {
-            await rm(resolve(__dirname, 'assets'), {recursive: true, force: true});
-        }
-    }],
-    // base: 'https://w99910.github.io/d3z/',
+    plugins: [vuePlugin(), prepare()],
     server: {
         open: './main.html',
     },
