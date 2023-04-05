@@ -1,151 +1,102 @@
 import {
     forceManyBody,
-    select,
-    map,
     forceLink,
     forceSimulation,
     forceCenter,
-    create,
     drag,
-    schemeTableau10,
-    forceX, forceY, max
 } from "d3";
 
-import Stats from 'stats.js'
 
-export default class Networkgraph {
+import BaseChart from "./BaseChart";
 
-    protected _data: Array<any>;
+export default class NetworkGraphChart extends BaseChart {
 
-    protected _margin = {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20,
-    }
+    protected _data: Array<any> | NetworkGraphChartData;
 
-    protected _debug = false;
 
-    constructor(protected container: HTMLElement) {
-
-    }
-
-    enableDebug() {
-        this._debug = true;
-        return this;
-    }
-
-    public data(data) {
+    public data(data: Array<any> | NetworkGraphChartData) {
         this._data = data;
-        return this;
-    }
-
-    public margin(top, right, bottom, left) {
-        this._margin = {
-            top: top,
-            right: right,
-            bottom: bottom,
-            left: left,
-        }
         return this;
     }
 
     build() {
         let data = {
             nodes: [],
-            links: [],
-        };
+            links: []
+        }
+        if (Array.isArray(this._data)) {
+            // generate ids and links
+            let nodes = [];
+            let links = [];
 
-        let linkableNodes = [];
-        let maxLinks = 1000;
-
-        for (let i = 0; i < maxLinks; i++) {
-
-
-            let source = Math.floor(Math.random() * maxLinks);
-            let target = Math.floor(Math.random() * maxLinks);
-
-            if (linkableNodes.indexOf(source) === -1) {
-                data.nodes.push({
-                    id: source,
-                    name: Math.random()
-                });
-                linkableNodes.push(source);
+            const addNode = (nodeId) => {
+                let index = nodes.filter((node) => node.id === nodeId);
+                if (index.length === 0) {
+                    nodes.push({
+                        id: nodeId,
+                    });
+                }
             }
 
-            if (linkableNodes.indexOf(target) === -1) {
-                data.nodes.push({
-                    id: target,
-                    name: Math.random()
-                });
-                linkableNodes.push(target);
+            for (let i = 0; i < this._data.length; i++) {
+                // entry should be [from,to]
+                if (Array.isArray(this._data[i]) && this._data[i].length === 2) {
+                    let from = this._data[i][0];
+                    let to = this._data[i][1];
+                    addNode(from);
+                    addNode(to);
+                    links.push({source: from, target: to});
+                }
             }
-
-            data.links.push({
-                source: source,
-                target: target,
-            })
+        } else {
+            if (this._data.nodes) {
+                data.nodes = this._data.nodes;
+            }
+            if (this._data.links) {
+                data.links = this._data.links;
+            }
         }
 
-        const width = this.container.getBoundingClientRect().width - this._margin.left - this._margin.right;
-        const height = this.container.getBoundingClientRect().height - this._margin.top - this._margin.bottom;
-
-
-        // Create the SVG element to hold the scatterplot
-        const svg = select(this.container)
-            .append("svg")
-            .attr("width", width + this._margin.left + this._margin.right)
-            .attr("height", height + this._margin.top + this._margin.bottom)
-            .attr("viewBox", [-width / 2, -height / 2, width, height])
-            .append("g")
-            .attr("transform",
-                "translate(" + this._margin.left + "," + this._margin.top + ")");
-
-        var simulation = forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
+        const simulation = forceSimulation(data.nodes) // Force algorithm is applied to data.nodes
             .force("link", forceLink()  // This force provides links between nodes
                 .id(function (d) {
                     // @ts-ignore
                     return d.id;
-                })                     // This provide  the id of a node
-                .links(data.links)     // and this the list of links
+                })
+                .links(data.links)
             )
             .force("charge", forceManyBody().distanceMax(100).strength(-100))         // This adds repulsion between nodes. Play with the -400 for the repulsion strength
-            .force("center", forceCenter())     // This force attracts nodes to the center of the svg area
+            .force("center", forceCenter(this.width / 2, this.height / 2))     // This force attracts nodes to the center of the svg area
             .on("tick", ticked);
 
         // Create a circle for each data point
-        var link = svg
+        const link = this.svg
             .selectAll("line")
             .data(data.links)
             .enter()
             .append("line")
-            .style("stroke", "#aaa")
+            .style("stroke", "#aaa");
 
         // Initialize the nodes
-        var node = svg
+        const node = this.svg
             .selectAll("circle")
             .data(data.nodes)
             .enter()
             .append("circle")
             .attr("r", 8)
-            .style("fill", "#69b3a2")
+            .style("fill", this.options.fillColor ?? '#72aaff')
             .call(onDrag(simulation))
 
         // Let's list the force we wanna apply on the network
-        let stats;
-        if (this._debug) {
-            stats = new Stats()
-            stats.showPanel(0)
-            document.querySelector('body').appendChild(stats.dom)
-        }
+
 
         let that = this;
 
         // This function is run at each iteration of the force algorithm, updating the nodes position.
         function ticked() {
-            if (that._debug) {
-                stats.begin();
-            }
+            // if (that._debug) {
+            //     stats.begin();
+            // }
             link.attr("x1", function (d) {
                 return d.source.x;
             })
@@ -161,14 +112,14 @@ export default class Networkgraph {
 
             node
                 .attr("cx", function (d) {
-                    return d.x + 6;
+                    return d.x;
                 })
                 .attr("cy", function (d) {
-                    return d.y - 6;
+                    return d.y;
                 });
-            if (that._debug) {
-                stats.end();
-            }
+            // if (that._debug) {
+            //     stats.end();
+            // }
         }
 
         function onDrag(simulation) {
@@ -194,6 +145,22 @@ export default class Networkgraph {
                 .on("drag", dragged)
                 .on("end", dragended);
         }
-    }
 
+        return this;
+    }
+}
+
+export type NetworkGraphChartData = {
+    nodes: Array<NetworkGraphNode>,
+    links: Array<NetworkGraphLink>
+}
+
+export type NetworkGraphNode = {
+    id: number,
+    name?: string,
+}
+
+export type NetworkGraphLink = {
+    source: number,
+    target: number,
 }
