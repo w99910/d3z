@@ -1,7 +1,7 @@
 import {
     axisBottom,
     axisLeft, axisRight, axisTop,
-    extent,
+    extent, interpolate,
     max,
     scaleBand,
     scaleLinear,
@@ -9,6 +9,23 @@ import {
     select, timeFormat,
 } from "d3";
 import Stats from 'stats.js'
+
+function endall(transition, callback) {
+    if (typeof callback !== "function") throw new Error("Wrong callback in endall");
+    if (transition.size() === 0) {
+        callback()
+    }
+    let timeout
+    transition
+        .on("end", function () {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+            timeout = setTimeout(() => {
+                callback()
+            }, 300);
+        });
+}
 
 export default abstract class BaseChart {
 
@@ -22,6 +39,9 @@ export default abstract class BaseChart {
         fillColor: null,
         textColor: null,
         strokeColor: null,
+        colors: null,
+        fromColor: null,
+        toColor: null,
         orientation: 'vertical',
         animation: {
             enabled: true,
@@ -29,6 +49,25 @@ export default abstract class BaseChart {
         },
         debug: false,
         reverse: false,
+    }
+
+    colors(a: Array<string> | string, b?: string) {
+        if (Array.isArray(a)) {
+            this.options.colors = a;
+        } else {
+            this.options.fromColor = a;
+            this.options.toColor = b;
+        }
+
+        return this;
+    }
+
+    protected getColors() {
+        if (this.options.colors) {
+            return this.options.colors;
+        }
+        const interpolateColor = interpolate(this.options.fromColor ?? 'red', this.options.toColor ?? 'blue')
+        return this._data.map((d, i) => interpolateColor(i / this._data.length));
     }
 
     public abstract build(): this;
@@ -40,6 +79,9 @@ export default abstract class BaseChart {
     protected beforeBuildCallbacks: Array<() => void> = [];
 
     protected _svg = null;
+
+
+    protected onEndAnimationCallbacks: Array<() => void> = [];
 
     protected constructor(protected container: HTMLElement) {
         const prototype = Object.getPrototypeOf(this);
@@ -55,11 +97,19 @@ export default abstract class BaseChart {
                     that.afterBuildCallbacks.forEach((callback) => {
                         callback();
                     });
+
+                    that.svg.transition().call(endall, () => {
+                        that.onEndAnimationCallbacks.forEach((callback) => {
+                            callback();
+                        });
+                    })
+
                     return this;
                 }
             }
         })
     }
+
 
     public beforeBuild(callback: () => void) {
         this.beforeBuildCallbacks.push(callback);
@@ -68,6 +118,11 @@ export default abstract class BaseChart {
 
     public afterBuild(callback: () => void) {
         this.afterBuildCallbacks.push(callback);
+        return this;
+    }
+
+    public onEndAnimation(callback: () => void) {
+        this.onEndAnimationCallbacks.push(callback);
         return this;
     }
 
@@ -90,7 +145,7 @@ export default abstract class BaseChart {
 
     protected getScaleY() {
         return scaleLinear()
-            .domain([0, max(this._data, function (d) {
+            .domain([0, max(this._data, function (d: any) {
                 return +d.value;
             })])
             .range([this.height, 0]);
@@ -123,7 +178,7 @@ export default abstract class BaseChart {
                     return a.name.getTime() - b.name.getTime();
                 });
                 scale = scaleTime()
-                    .domain(extent(this._data, function (d) {
+                    .domain(extent(this._data, function (d: any) {
                         return d.name;
                     })).range([0, this.width]);
                 break;
@@ -135,7 +190,7 @@ export default abstract class BaseChart {
                 break;
             case 'linear':
                 scale = scaleLinear()
-                    .domain([0, max(this._data, function (d) {
+                    .domain([0, max(this._data, function (d: any) {
                         return +d.name;
                     })])
                     .range([0, this.width]);

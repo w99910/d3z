@@ -18,11 +18,11 @@ export default class AreaChart extends BaseChart {
             .datum(this._data)
             .attr("fill", this.options.fillColor ?? '#72aaff')
             .attr('clip-path', 'url(#clip)')
-            .attr('d', area().x(function (d) {
+            .attr('d', area().x(function (d: any) {
                 return scaleX(d.name)
             })
                 .y0(scaleY(0))
-                .y1(function (d) {
+                .y1(function (d: any) {
                     return scaleY(d.value)
                 }))
 
@@ -33,10 +33,10 @@ export default class AreaChart extends BaseChart {
             .attr("stroke-width", 1.5)
             .attr('clip-path', 'url(#clip)')
             .attr("d", line()
-                .x(function (d) {
+                .x(function (d: any) {
                     return scaleX(d.name)
                 })
-                .y(function (d) {
+                .y(function (d: any) {
                     return scaleY(d.value)
                 }))
 

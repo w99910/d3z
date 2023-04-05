@@ -24,7 +24,7 @@ onMounted(() => {
 
     const data = generateRandomData();
 
-    chart.data(data).build().pretty()
+    chart.data(data).enablePointIndicator().build().pretty()
 })
 
 </script>

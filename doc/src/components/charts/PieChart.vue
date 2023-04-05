@@ -43,7 +43,7 @@ onMounted(() => {
     const pieChart = new PieChart(document.getElementById('pie-chart'));
 
     try {
-        pieChart.data(data).colors('brown', 'yellow').build()
+        pieChart.data(data).build()
     } catch (e) {
         console.log(e)
     }
