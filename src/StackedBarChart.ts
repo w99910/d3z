@@ -12,7 +12,7 @@ export default class StackedBarChart extends BaseChart {
         return this;
     }
 
-    data(data: StackedBarChart | any): this {
+    data(data: StackedBarChartData | any): this {
         return super.data(data);
     }
 
@@ -78,12 +78,11 @@ export default class StackedBarChart extends BaseChart {
                     .remove()
             )
         })
-
         return this;
     }
 }
 
-export type StackedBarChartData = Array<{
+type StackedBarChartData = Array<{
     name: string,
     data: Array<ChartData>
 }>

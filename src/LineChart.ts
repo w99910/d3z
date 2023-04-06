@@ -18,7 +18,7 @@ export default class LineChart extends BaseChart {
         const scaleX = this.buildAxisBottom();
 
         const scaleY = this.buildAxisLeft()
-
+        //
         if (this.showPointIndicator) {
             this.svg.selectAll("circle.point")
                 .data(this._data)
@@ -49,7 +49,10 @@ export default class LineChart extends BaseChart {
                             return scaleY(d.value)
                         })
                     },
-                    exit => exit.remove(),
+                    exit => {
+                        exit.transition().duration(this.options.animation.duration)
+                            .attr('r', 20)
+                    },
                 )
         }
 
@@ -85,21 +88,18 @@ export default class LineChart extends BaseChart {
                     .transition()
                     .duration(this.options.animation.duration)
                     .attr('stroke-dashoffset', 0)
+                const clip = this.svg.append("clipPath")
+                    .attr("id", "clip");
+                const clipRect = clip.append("rect")
+                    .attr("width", 0)
+                    .attr("height", this.height)
+
+                clipRect.transition()
+                    .duration(this.options.animation.duration)
+                    .attr("width", this.width)
             }
         }
 
-
-        if (this.options.animation.enabled) {
-            const clip = this.svg.append("clipPath")
-                .attr("id", "clip");
-            const clipRect = clip.append("rect")
-                .attr("width", 0)
-                .attr("height", this.height)
-
-            clipRect.transition()
-                .duration(this.options.animation.duration)
-                .attr("width", this.width)
-        }
 
         return this;
     }

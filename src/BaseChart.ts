@@ -154,7 +154,18 @@ export default abstract class BaseChart {
         return this;
     }
 
+    sortData(ascending = true) {
+        console.log(this._data.sort((a, b) => {
+            if (a.value > b.value) return -1;
+            if (a.value < b.value) return 1;
+            return 0;
+        }))
+    }
+
     update(data: any): this {
+        if (!document.body.contains(this.svg.node())) {
+            return;
+        }
         this._data = data;
         select(this.container).select('.axis-x').selectChildren('g').remove();
         select(this.container).select('.axis-y').selectChildren('g').remove();

@@ -10,7 +10,7 @@ import {onMounted} from "vue";
 
 onMounted(() => {
     const areaChart = new AreaChart(document.getElementById('area-chart'));
-    const generateRandomData = (length = 20) => {
+    const generateRandomData = (length = 100) => {
         const data = [];
         for (let i = 0; i <= length; i++) {
             data.push({
@@ -26,7 +26,7 @@ onMounted(() => {
     areaChart.data(data).build().pretty()
 
     setInterval(() => {
-        areaChart.update(generateRandomData(20)).pretty()
+        areaChart.update(generateRandomData()).pretty()
     }, 2000)
 })
 
