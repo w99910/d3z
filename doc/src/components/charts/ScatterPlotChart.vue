@@ -24,6 +24,10 @@ onMounted(() => {
     const data = generateRandomData(100);
 
     chart.data(data).radius(2.5).build().pretty()
+
+    setInterval(() => {
+        chart.update(generateRandomData(100)).pretty()
+    }, 2000)
 })
 </script>
 

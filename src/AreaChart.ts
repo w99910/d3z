@@ -7,44 +7,61 @@ export default class AreaChart extends BaseChart {
 
         const scaleY = this.buildAxisLeft();
 
+        const areaGenerator = area().x(function (d: any) {
+            return scaleX(d.name)
+        })
+            .y0(scaleY(0))
+            .y1(function (d: any) {
+                return scaleY(d.value)
+            });
+
+        const lineGenerator = line()
+            .x(function (d: any) {
+                return scaleX(d.name)
+            })
+            .y(function (d: any) {
+                return scaleY(d.value)
+            });
+
+        let areaPath = this.svg.select('path.area');
+
+        // let linePath = this.svg.select('path.line');
+
+        if (!areaPath.empty()) {
+            areaPath.attr('clip-path', null)
+            // linePath.attr('clip-path', null)
+            if (this.options.animation.enabled) {
+                areaPath = areaPath.transition().duration(this.options.animation.duration)
+                // linePath = linePath.transition().duration(this.options.animation.duration)
+            }
+            areaPath.attr('d', areaGenerator(this._data))
+            // linePath.attr('d', lineGenerator(this._data))
+            return;
+        }
+
         const clip = this.svg.append("clipPath")
             .attr("id", "clip");
         const clipRect = clip.append("rect")
             .attr("width", 0)
             .attr("height", this.height)
 
-        let areaPath = this.svg.append("path")
+        this.svg.append("path")
             .attr('class', 'area')
-            .datum(this._data)
-            .attr("fill", this.options.fillColor ?? '#72aaff')
+            .attr("fill", this.options.fillColor ?? '#a2d2ff')
             .attr('clip-path', 'url(#clip)')
-            .attr('d', area().x(function (d: any) {
-                return scaleX(d.name)
-            })
-                .y0(scaleY(0))
-                .y1(function (d: any) {
-                    return scaleY(d.value)
-                }))
+            .attr('d', areaGenerator(this._data))
 
-        let linePath = this.svg.append("path")
-            .datum(this._data)
-            .attr("fill", "none")
-            .attr("stroke", this.options.strokeColor ?? '#8d8d8d')
-            .attr("stroke-width", 1.5)
-            .attr('clip-path', 'url(#clip)')
-            .attr("d", line()
-                .x(function (d: any) {
-                    return scaleX(d.name)
-                })
-                .y(function (d: any) {
-                    return scaleY(d.value)
-                }))
+        // this.svg.append("path")
+        //     .attr('class', 'line')
+        //     .attr("fill", "none")
+        //     .attr("stroke", this.options.strokeColor ?? '#d7d7d7')
+        //     .attr("stroke-width", 1.5)
+        //     .attr('clip-path', 'url(#clip)')
+        //     .attr("d", lineGenerator(this._data))
 
-        if (this.options.animation.enabled) {
-            clipRect.transition()
-                .duration(this.options.animation.duration)
-                .attr("width", this.width)
-        }
+        clipRect.transition()
+            .duration(this.options.animation.duration)
+            .attr("width", this.width)
         return this;
     }
 

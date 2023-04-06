@@ -11,7 +11,7 @@ import {onMounted} from "vue";
 
 onMounted(() => {
     const chart = new LineChart(document.getElementById('line-chart'));
-    const generateRandomData = (length = 20) => {
+    const generateRandomData = (length = 100) => {
         const data = [];
         for (let i = 0; i <= length; i++) {
             data.push({
@@ -25,6 +25,10 @@ onMounted(() => {
     const data = generateRandomData();
 
     chart.data(data).enablePointIndicator().build().pretty()
+
+    setInterval(() => {
+        chart.update(generateRandomData()).pretty();
+    }, 2000)
 })
 
 </script>

@@ -24,6 +24,10 @@ onMounted(() => {
     const data = generateRandomData();
 
     areaChart.data(data).build().pretty()
+
+    setInterval(() => {
+        areaChart.update(generateRandomData(20)).pretty()
+    }, 2000)
 })
 
 

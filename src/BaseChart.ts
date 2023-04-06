@@ -1,7 +1,6 @@
 import {
     axisBottom,
-    axisLeft, axisRight, axisTop,
-    extent, interpolate,
+    axisLeft, interpolate,
     max,
     scaleBand,
     scaleLinear,
@@ -36,6 +35,7 @@ export default abstract class BaseChart {
             bottom: 20,
             left: 20,
         },
+        gap: 10,
         fillColor: null,
         textColor: null,
         strokeColor: null,
@@ -62,12 +62,25 @@ export default abstract class BaseChart {
         return this;
     }
 
-    protected getColors() {
+    /**
+     * @param data ChartData[] or number of colors to be returned
+     * @protected
+     */
+    protected getColors(data: Array<ChartData> | number = null) {
         if (this.options.colors) {
             return this.options.colors;
         }
         const interpolateColor = interpolate(this.options.fromColor ?? 'red', this.options.toColor ?? 'blue')
-        return this._data.map((d, i) => interpolateColor(i / this._data.length));
+        let dataSource;
+        if (typeof data === 'number') {
+            dataSource = [];
+            for (let i = 0; i <= data; i++) {
+                dataSource.push(i);
+            }
+        } else {
+            dataSource = data ?? this._data;
+        }
+        return dataSource.map((d, i) => interpolateColor(i / this._data.length));
     }
 
     public abstract build(): this;
@@ -79,7 +92,6 @@ export default abstract class BaseChart {
     protected beforeBuildCallbacks: Array<() => void> = [];
 
     protected _svg = null;
-
 
     protected onEndAnimationCallbacks: Array<() => void> = [];
 
@@ -103,7 +115,6 @@ export default abstract class BaseChart {
                             callback();
                         });
                     })
-
                     return this;
                 }
             }
@@ -132,6 +143,12 @@ export default abstract class BaseChart {
         document.querySelector('body').appendChild(stats.dom)
     }
 
+    gap(gap: number) {
+        this.options.gap = gap;
+        return this;
+    }
+
+
     public data(data: any) {
         this._data = data;
         return this;
@@ -139,34 +156,36 @@ export default abstract class BaseChart {
 
     update(data: any): this {
         this._data = data;
-        select(this.container).select('svg').remove();
+        select(this.container).select('.axis-x').selectChildren('g').remove();
+        select(this.container).select('.axis-y').selectChildren('g').remove();
+        // select(this.container).select('svg').remove();
         return this.build();
     }
 
-    protected getScaleY() {
+    protected getScaleY(data: Array<ChartData>) {
         return scaleLinear()
-            .domain([0, max(this._data, function (d: any) {
+            .domain([0, max(data, function (d: any) {
                 return +d.value;
             })])
-            .range([this.height, 0]);
+            .range([this.height, 0]).nice();
     }
 
-    protected getScaleX() {
-        if (this._data.length === 0) {
+    protected getScaleX(data: Array<ChartData>) {
+        if (data.length === 0) {
             throw new Error('No data provided')
         }
 
         let scaleType;
 
-        if (this._data[0].name instanceof Date) {
+        if (data[0].name instanceof Date) {
             scaleType = 'time';
         }
 
-        if (typeof this._data[0].name === 'string') {
+        if (typeof data[0].name === 'string') {
             scaleType = 'band';
         }
 
-        if (typeof this._data[0].name === 'number') {
+        if (typeof data[0].name === 'number') {
             scaleType = 'linear';
         }
 
@@ -174,47 +193,54 @@ export default abstract class BaseChart {
         switch (scaleType) {
             case 'time':
                 // sort by date
-                this._data = this._data.sort((a, b) => {
+                data = data.sort((a, b) => {
                     return a.name.getTime() - b.name.getTime();
                 });
                 scale = scaleTime()
-                    .domain(extent(this._data, function (d: any) {
-                        return d.name;
-                    })).range([0, this.width]);
+                    .domain([data[0].name, data[data.length - 1].name]).range([0, this.width]).nice();
                 break;
             case 'band':
                 scale = scaleBand().range([0, this.width])
-                    .domain(this._data.map(function (d: ChartData) {
+                    .domain(data.map(function (d: ChartData) {
                         return d.name;
-                    })).padding(0.2);
+                    })).padding(0.4);
                 break;
             case 'linear':
                 scale = scaleLinear()
-                    .domain([0, max(this._data, function (d: any) {
+                    .domain([0, max(data, function (d: any) {
                         return +d.name;
                     })])
-                    .range([0, this.width]);
+                    .range([0, this.width]).nice();
         }
         return scale;
     }
 
 
-    protected buildAxisLeft() {
-        // determine if scale type is band or time
-        const scale = this.getScaleY();
-        this.svg.append("g")
+    protected buildAxisLeft(data: Array<ChartData> = null) {
+        const scale = this.getScaleY(data ?? this._data);
+        let axisLeftGroup = this.svg.select('.axis-y');
+        if (axisLeftGroup.empty()) {
+            axisLeftGroup = this.svg.append('g')
+                .attr('class', 'axis-y')
+        }
+
+        axisLeftGroup
             .call(this.options.reverse ? axisBottom(scale) : axisLeft(scale));
         return scale;
     }
 
 
-    protected buildAxisBottom() {
-        const scale = this.getScaleX()
+    protected buildAxisBottom(data: Array<ChartData> = null) {
+        const scale = this.getScaleX(data ?? this._data)
         const axis = this.options.reverse ? axisLeft(scale) : axisBottom(scale);
 
-        this.svg.append("g")
-            .attr("transform", "translate(0," + this.height + ")")
-            .call(axis);
+        let axisBottomGroup = this.svg.select('.axis-x');
+        if (axisBottomGroup.empty()) {
+            axisBottomGroup = this.svg.append('g')
+                .attr('class', 'axis-x')
+                .attr("transform", "translate(0," + this.height + ")")
+        }
+        axisBottomGroup.call(axis);
 
         return scale;
     }
@@ -256,11 +282,9 @@ export default abstract class BaseChart {
     }
 
     public pretty() {
-        let mainGroup = this.container.querySelector('svg g');
 
-        let xAxisGroup = mainGroup.children[0];
-        let yAxisGroup = mainGroup.children[1]
-
+        let xAxisGroup = this.container.querySelector('g.axis-x');
+        let yAxisGroup = this.container.querySelector('g.axis-y');
 
         xAxisGroup.querySelector('path.domain').setAttribute('stroke', '0');
         yAxisGroup.querySelector('path.domain').setAttribute('stroke', '0');

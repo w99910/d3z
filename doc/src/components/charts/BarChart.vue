@@ -7,12 +7,22 @@
 <script setup>
 import {BarChart} from "d3z";
 
-import {onMounted} from "vue";
+import {onActivated, onDeactivated, onMounted, ref} from "vue";
+
+const shouldRender = ref(true);
+
+onActivated(() => {
+    shouldRender.value = true;
+})
+
+onDeactivated(() => {
+    shouldRender.value = false;
+});
 
 onMounted(() => {
     let barChartBuilder = new BarChart(document.getElementById('bar-chart'));
 
-    const fruits = ['Apple', 'Banana', 'Orange', 'Mango', 'Pineapple', 'Strawberry', 'Watermelon'];
+    const fruits = ['Apple', 'Apple', 'Banana', 'Orange', 'Mango', 'Pineapple', 'Strawberry', 'Watermelon'];
 
     const generateData = () => {
         const data = [];
@@ -28,7 +38,13 @@ onMounted(() => {
     const data = generateData();
 
     barChartBuilder.data(data).margin({top: 40, bottom: 60, left: 40}).build()
-        .pretty();
+        .pretty()
+
+    setInterval(() => {
+        if (shouldRender.value) {
+            barChartBuilder.update(generateData()).pretty();
+        }
+    }, 3000);
 })
 
 </script>
