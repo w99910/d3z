@@ -28,7 +28,7 @@ onMounted(() => {
     }, {
         name: 'B',
         data: generateData(),
-    }]).build().roundedCorner(2);
+    }]).build().roundedCorner(2).pretty();
 
     setInterval(() => {
         chart.update([{
@@ -37,7 +37,7 @@ onMounted(() => {
         }, {
             name: 'B',
             data: generateData(),
-        }])
+        }]).pretty()
     }, 2000)
 
 })

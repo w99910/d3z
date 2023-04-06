@@ -9,6 +9,7 @@ export default class StackedBarChart extends BaseChart {
 
     roundedCorner(radius: number = 5) {
         this.svg.selectAll('rect').attr('rx', radius).attr('ry', radius);
+        return this;
     }
 
     data(data: StackedBarChart | any): this {
@@ -35,7 +36,7 @@ export default class StackedBarChart extends BaseChart {
                     enter = enter.append("rect")
                         .attr('class', `bar ${name}`)
                         .attr("x", function (d: ChartData) {
-                            return scaleX(d.name) + (index * 10);
+                            return scaleX(d.name) - (index * 10);
                         })
                         .attr("width", scaleX.bandwidth())
                     if (that.options.animation.enabled) {

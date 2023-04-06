@@ -3,6 +3,7 @@ import BaseChart, {ChartData} from "./BaseChart";
 export default class BarChart extends BaseChart {
     roundedCorner(radius: number = 5) {
         this.svg.selectAll('rect').attr('rx', radius).attr('ry', radius);
+        return this;
     }
 
     public build() {
