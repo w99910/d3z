@@ -36,6 +36,7 @@ export default class StackedBarChart extends BaseChart {
                 enter => {
                     enter = enter.append("rect")
                         .attr('class', `bar ${name}`)
+                        .attr('stroke', this.options.strokeColor)
                         .attr("x", function (d: ChartData) {
                             return scaleX(d.name) - (index * 10);
                         })

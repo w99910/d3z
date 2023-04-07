@@ -53,6 +53,11 @@ export default abstract class BaseChart {
         legend: true,
     }
 
+    stroke(color: string) {
+        this.options.strokeColor = color;
+        return this;
+    }
+
     colors(a: Array<string> | string, b?: string) {
         if (Array.isArray(a)) {
             this.options.colors = a;

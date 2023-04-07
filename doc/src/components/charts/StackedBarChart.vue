@@ -60,7 +60,7 @@ onMounted(() => {
             data: generate(),
         }];
     }
-    chart.data(generateData()).margin({bottom: 50}).build().rotateLabels().pretty();
+    chart.data(generateData()).stroke('#848484').margin({bottom: 50}).build().rotateLabels().pretty();
     // setInterval(() => {
     //     chart.update().pretty()
     // }, 2000)
