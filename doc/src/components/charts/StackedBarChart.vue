@@ -9,36 +9,62 @@ import {StackedBarChart} from "d3z";
 import {onMounted} from "vue";
 
 onMounted(() => {
+    const generateData = () => {
+        const totalData = [];
+        const usedData = [];
+        const randomDate = () => {
+            const start = new Date(2022, 0, 1);
+            const end = new Date();
+            return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        }
+        for (let i = 0; i < 30; i++) {
+            const total = Math.floor(Math.random() * 100)
+            const used = Math.floor(Math.random() * total)
+            const date = randomDate()
+            totalData.push({
+                name: date,
+                value: total,
+            })
+            usedData.push({
+                name: date,
+                value: used,
+            })
+        }
+        return [{
+            name: 'Total',
+            data: totalData,
+        }, {
+            name: 'Used',
+            data: usedData,
+        }]
+    }
     const chart = new StackedBarChart(document.getElementById('stackedbar-chart'));
     const fruits = ['Apple', 'Apple', 'Banana', 'Orange', 'Mango', 'Pineapple', 'Strawberry', 'Watermelon'];
 
-    const generateData = () => {
-        const data = [];
-        for (let fruit of fruits) {
-            data.push({
-                name: fruit,
-                value: Math.floor(Math.random() * 100)
-            })
+    const generateDataa = () => {
+        const generate = () => {
+            const data = [];
+            for (let fruit of fruits) {
+                data.push({
+                    name: fruit,
+                    value: Math.floor(Math.random() * 100)
+                })
+            }
+            return data;
         }
-        return data;
-    }
-    chart.data([{
-        name: 'A',
-        data: generateData(),
-    }, {
-        name: 'B',
-        data: generateData(),
-    }]).build().roundedCorner(2).pretty();
-
-    setInterval(() => {
-        chart.update([{
+        return [{
             name: 'A',
-            data: generateData(),
+            data: generate(),
         }, {
             name: 'B',
-            data: generateData(),
-        }]).pretty()
-    }, 2000)
+            data: generate(),
+        }];
+    }
+    chart.data(generateData()).margin({bottom: 50}).build().rotateLabels().pretty();
+    // setInterval(() => {
+    //     chart.update().pretty()
+    // }, 2000)
+
 
 })
 </script>

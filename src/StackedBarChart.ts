@@ -1,4 +1,5 @@
 import BaseChart, {ChartData} from "./BaseChart";
+import {select} from "d3";
 
 export default class StackedBarChart extends BaseChart {
     constructor(props) {
@@ -38,7 +39,8 @@ export default class StackedBarChart extends BaseChart {
                         .attr("x", function (d: ChartData) {
                             return scaleX(d.name) - (index * 10);
                         })
-                        .attr("width", scaleX.bandwidth())
+                        .attr('tooltip', (d: ChartData) => d.name + ': ' + d.value)
+                        .attr("width", (this.width / mergedData.length))
                     if (that.options.animation.enabled) {
                         enter = enter.attr('height', 0)
                             .attr("y", function (d) {
@@ -78,6 +80,17 @@ export default class StackedBarChart extends BaseChart {
                     .remove()
             )
         })
+        if (this.options.tooltip) {
+            this.buildTooltip(
+                'rect',
+                (d) => d.name + ': ' + d.value)
+        }
+
+        if (this.options.legend) {
+            this.buildLegends(this._data, colors)
+        }
+
+
         return this;
     }
 }

@@ -49,6 +49,8 @@ export default abstract class BaseChart {
         },
         debug: false,
         reverse: false,
+        tooltip: true,
+        legend: true,
     }
 
     colors(a: Array<string> | string, b?: string) {
@@ -201,6 +203,7 @@ export default abstract class BaseChart {
         }
 
         let scale;
+        const range = this.options.orientation === 'vertical' ? [0, this.width] : [this.height, 0];
         switch (scaleType) {
             case 'time':
                 // sort by date
@@ -208,10 +211,10 @@ export default abstract class BaseChart {
                     return a.name.getTime() - b.name.getTime();
                 });
                 scale = scaleTime()
-                    .domain([data[0].name, data[data.length - 1].name]).range([0, this.width]).nice();
+                    .domain([data[0].name, data[data.length - 1].name]).range(range).nice();
                 break;
             case 'band':
-                scale = scaleBand().range([0, this.width])
+                scale = scaleBand().range(range)
                     .domain(data.map(function (d: ChartData) {
                         return d.name;
                     })).padding(0.4);
@@ -221,7 +224,7 @@ export default abstract class BaseChart {
                     .domain([0, max(data, function (d: any) {
                         return +d.name;
                     })])
-                    .range([0, this.width]).nice();
+                    .range(range).nice();
         }
         return scale;
     }
@@ -328,6 +331,80 @@ export default abstract class BaseChart {
 
     public disableAnimation() {
         this.options.animation.enabled = false;
+        return this;
+    }
+
+    public tooltip(enabled: boolean) {
+        this.options.tooltip = enabled;
+        return this;
+    }
+
+    protected buildTooltip(element, text: (d: ChartData) => string, styles = {}) {
+        // Tooltip
+        const tooltip = select(this.svg.node().parentElement.parentElement).append('div').attr('class', 'tooltip')
+            .style('opacity', 0)
+            .style('position', 'fixed')
+            .style('background-color', 'white')
+            .style('border', 'solid')
+            .style('border-width', '1px')
+            .style('border-radius', '5px')
+            .style('padding', '2px')
+            .style('font-size', '12px')
+            .style('z-index', '1000')
+            .style('pointer-events', 'none')
+
+        for (let property of Object.keys(styles)) {
+            const resolveCamma = (property) => {
+                return property.replace(/([A-Z])/g, (g) => `-${g[0].toLowerCase()}`);
+            }
+            tooltip.style(resolveCamma(property), styles[property]);
+        }
+
+        this.svg.selectAll(element).on('mouseover', function (event, d) {
+            tooltip.transition().duration(100)
+                .style('opacity', 1)
+                .style('left', (event.pageX + 2) + 'px')
+                .style('top', (event.pageY + 2) + 'px')
+                .text(text(d));
+        }).on('mouseout', function (event, d) {
+            tooltip.transition().duration(100)
+                .style('opacity', 0);
+        })
+    }
+
+    legend(enabled: boolean) {
+        this.options.legend = enabled;
+        return this;
+    }
+
+    protected buildLegends(data, colors) {
+        data.forEach((d, index) => {
+            const legend = this.svg
+                .append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${(this.width - 100) + (index * 60)}, ${this.options.margin.top})`)
+            legend.append('rect')
+                .attr('width', 10)
+                .attr('height', 10)
+                .attr('fill', colors[index])
+            legend.append('text')
+                .attr('x', 15)
+                .attr('y', 10)
+                .text(d.name)
+        })
+    }
+
+    rotateLabels(xAxis = true, yAxis = true) {
+        if (xAxis) {
+            this.svg.selectAll('.axis-x text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+        }
+        if (yAxis) {
+            this.svg.selectAll('.axis-y text')
+                .attr('transform', 'rotate(-45)')
+                .style('text-anchor', 'end');
+        }
         return this;
     }
 }
