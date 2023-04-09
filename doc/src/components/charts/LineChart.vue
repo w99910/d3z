@@ -24,11 +24,11 @@ onMounted(() => {
 
     const data = generateRandomData();
 
-    chart.data(data).enablePointIndicator().build().pretty()
+    chart.data(data).build().pretty()
 
-    // setInterval(() => {
-    //     chart.update(generateRandomData());
-    // }, 2000)
+    setInterval(() => {
+        chart.update(generateRandomData()).pretty();
+    }, 2000)
 })
 
 </script>

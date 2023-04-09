@@ -23,7 +23,7 @@ onMounted(() => {
 
     const data = generateRandomData();
 
-    areaChart.data(data).build().pretty()
+    areaChart.data(data).fillColor('#a2bcff').build().pretty()
 
     setInterval(() => {
         areaChart.update(generateRandomData()).pretty()

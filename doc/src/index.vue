@@ -44,7 +44,7 @@ const components = {
     },
 };
 
-const _component = ref('introduction');
+let _component = ref('introduction');
 
 const currentComponent = computed(() => {
     return _component.value
