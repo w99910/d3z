@@ -25,7 +25,7 @@ const AreaChart = <T extends Chartable>(Parent: T) => {
                     areaPath = areaPath.transition().duration(this.getOptions().animation.duration)
                 }
                 areaPath.attr('d', areaGenerator(this.getData()))
-                return;
+                return this;
             }
 
             const clip = this.svg().append("clipPath")

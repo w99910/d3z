@@ -1,9 +1,6 @@
 import {ChartData} from "./BaseChart";
 import Chart from "./Chart";
 import {Chartable} from "./interfaces/Chartable";
-import B from "./B";
-
-(new B()).test();
 
 const BarChart = <T extends Chartable>(Parent: T) => {
     return class extends Parent {
